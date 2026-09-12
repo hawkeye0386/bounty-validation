@@ -3,17 +3,7 @@
 Small Windows regression experiments supporting investigation of a public
 [Okular PDF replacement issue](https://discuss.kde.org/t/paid-request-okular-don-t-lock-file-for-overwrite/49519).
 
-The harness distinguishes overwriting a file, replacing it by rename, and
-deleting it before creating a new file at the same path. It compares the file
-sharing flags currently used by Poppler with a candidate that adds delete
-sharing.
-
-These are operating-system behavior checks. Passing them does not establish
-that a complete Okular integration works or that a sponsor has accepted a fix.
-
-The GitHub Actions job uses a standard Windows runner and has a five-minute
-timeout. It does not use account secrets, access user files, or contact a
-production application.
+`windows-file-sharing-diagnostics` preserves the direct Win32 measurements for overwriting, `MoveFileExW` replacement, and delete/recreate under the original and candidate sharing flags. It records outcomes rather than treating them as a Poppler integration test.
 
 ## First measurements
 
@@ -24,5 +14,22 @@ sharing modes. `MoveFileExW` replacement failed with error 5 in both modes.
 deletion and recreation of the pathname both succeeded while the old reader
 remained open. The rename result needs further investigation.
 
-A successful job means the measurements completed, not that each operation
-succeeded. These observations do not yet verify a Poppler or Okular build.
+## Pinned Poppler `GooFile` regression
+
+`goo-file-baseline-delete-recreate` and `goo-file-candidate-delete-recreate`
+compile Poppler's pinned `goo/gfile.cc` and `goo/gfile.h` twice: once unchanged
+and once with the two-line `FILE_SHARE_DELETE` patch. The build uses minimal
+Windows-only `config.h` and export headers, including `HAVE_FSEEK64=1`, so no
+PDF parser, Qt component, or desktop application is built.
+
+The baseline test requires `DeleteFile` to fail with
+`ERROR_SHARING_VIOLATION` (32) while a `GooFile` reader is open, then verifies
+that both open `GooFile` readers still read byte `A`. The candidate test covers
+both `GooFile::open` overloads: narrow ASCII and wide Unicode. It requires
+delete, `CREATE_NEW`, and writing byte `B` to succeed, verifies the original
+reader still reads `A`, then verifies a newly opened `GooFile` reads `B`.
+
+These tests demonstrate only Windows file-sharing behavior and the `GooFile`
+component. They do not test PDF parsing, atomic replacement behavior beyond the
+diagnostic measurement, Okular's document lifetime, or automatic reload
+behavior.

@@ -1,4 +1,4 @@
-name: Windows file-sharing semantics
+name: Poppler GooFile Windows delete/recreate
 
 on:
   pull_request:
