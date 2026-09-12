@@ -1,0 +1,10 @@
+********* Start testing of Okular::PartTest *********
+Config: Using QtTest library 6.10.2, Qt 6.10.2 (arm64-little_endian-lp64 shared (dynamic) release build; by GCC 15.2.0), ubuntu 26.04
+PASS   : Okular::PartTest::initTestCase()
+QDEBUG : Okular::PartTest::testAutoReloadAfterDeleteAndRecreate(rapid) Settings::instance called after the first use - ignoring
+PASS   : Okular::PartTest::testAutoReloadAfterDeleteAndRecreate(rapid)
+QDEBUG : Okular::PartTest::testAutoReloadAfterDeleteAndRecreate(delayed) Settings::instance called after the first use - ignoring
+PASS   : Okular::PartTest::testAutoReloadAfterDeleteAndRecreate(delayed)
+PASS   : Okular::PartTest::cleanupTestCase()
+Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 8373ms
+********* Finished testing of Okular::PartTest *********

@@ -38,3 +38,7 @@ The [component run](https://github.com/hawkeye0386/bounty-validation/actions/run
 at commit `38e81fa` passed all three CTest entries on Windows Server 2025
 (10.0.26100), including the baseline and candidate checks for both filename
 overloads. The original diagnostics reproduced the first run's results.
+
+## Okular automatic reload
+
+A separate [actual Okular regression](okular-refresh/README.md) passes rapid and delayed delete/recreate cycles with both the default Linux watcher and requested QFileSystemWatcher backend. This adds Linux application evidence; it does not establish the combined Windows 11 application outcome.

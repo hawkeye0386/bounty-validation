@@ -1,0 +1,70 @@
+diff --git a/autotests/parttest.cpp b/autotests/parttest.cpp
+index bc34b36..b04ff2f 100644
+--- a/autotests/parttest.cpp
++++ b/autotests/parttest.cpp
+@@ -48,6 +48,8 @@
+ #include <QTreeView>
+ #include <QUrl>
+ 
++#include <utility>
++
+ namespace Okular
+ {
+ class PartTest : public QObject
+@@ -64,6 +66,8 @@ private Q_SLOTS:
+ 
+     void testZoomWithCrop();
+     void testReload();
++    void testAutoReloadAfterDeleteAndRecreate_data();
++    void testAutoReloadAfterDeleteAndRecreate();
+     void testCanceledReload();
+     void testTOCReload();
+     void testForwardPDF();
+@@ -186,6 +190,47 @@ void PartTest::testReload()
+     qApp->processEvents();
+ }
+ 
++void PartTest::testAutoReloadAfterDeleteAndRecreate_data()
++{
++    QTest::addColumn<int>("gapMs");
++
++    QTest::newRow("rapid") << 0;
++    QTest::newRow("delayed") << 1100;
++}
++
++void PartTest::testAutoReloadAfterDeleteAndRecreate()
++{
++    QFETCH(int, gapMs);
++
++    const QTemporaryDir tempDir;
++    QVERIFY(tempDir.isValid());
++    const QString livePdf = QDir(tempDir.path()).filePath(QStringLiteral("live.pdf"));
++    const QString singlePagePdf = QStringLiteral(KDESRCDIR "data/file1.pdf");
++    const QString multiPagePdf = QStringLiteral(KDESRCDIR "data/simple-multipage.pdf");
++    QVERIFY(QFile::copy(singlePagePdf, livePdf));
++
++    Okular::Part part(nullptr, {});
++    QVERIFY(openDocument(&part, livePdf));
++    part.setWatchFileModeEnabled(true);
++    QVERIFY(part.isWatchFileModeEnabled());
++    QCOMPARE(part.m_document->pages(), 1u);
++    const QUrl liveUrl = QUrl::fromLocalFile(livePdf);
++
++    const QList<std::pair<QString, uint>> replacements = { { multiPagePdf, 40u }, { singlePagePdf, 1u }, { multiPagePdf, 40u } };
++    for (const auto &[replacement, expectedPages] : replacements) {
++        const uint oldPageCount = part.m_document->pages();
++        QVERIFY(QFile::remove(livePdf));
++        if (gapMs > 0) {
++            QTest::qWait(gapMs);
++            QCOMPARE(part.m_document->pages(), oldPageCount);
++        }
++        QVERIFY(QFile::copy(replacement, livePdf));
++        QTRY_COMPARE_WITH_TIMEOUT(part.m_document->pages(), expectedPages, 10000);
++        QVERIFY(part.m_document->isOpened());
++        QCOMPARE(part.url(), liveUrl);
++    }
++}
++
+ // Test that Okular doesn't crash after a canceled reload
+ void PartTest::testCanceledReload()
+ {
