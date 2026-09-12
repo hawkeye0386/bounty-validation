@@ -33,3 +33,8 @@ These tests demonstrate only Windows file-sharing behavior and the `GooFile`
 component. They do not test PDF parsing, atomic replacement behavior beyond the
 diagnostic measurement, Okular's document lifetime, or automatic reload
 behavior.
+
+The [component run](https://github.com/hawkeye0386/bounty-validation/actions/runs/34667189676)
+at commit `38e81fa` passed all three CTest entries on Windows Server 2025
+(10.0.26100), including the baseline and candidate checks for both filename
+overloads. The original diagnostics reproduced the first run's results.
